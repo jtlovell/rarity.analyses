@@ -7,7 +7,8 @@ spatial.genetic.graph<-function(pop.obj=gs,
                                 node.size.expander=7,
                                 node.size.mean=0,
                                 popgraph.alpha=0.2,
-                                map.zoom=6
+                                map.zoom=6,
+                                plotmap=F
 ){
   if(is.null(subset.column) | is.null(tosubset)){
     subdata<-pop.obj
@@ -18,7 +19,13 @@ spatial.genetic.graph<-function(pop.obj=gs,
   pops <- subdata[,stratum]
   graph <- popgraph(x = data, groups = pops, alpha=popgraph.alpha)
   eb <- edge.betweenness.community(graph, modularity=T, directed=F)
-  cat("\n",tosubset, ": modularity = ", max(eb[[5]]), " n.groups = ", length(unique(eb$membership)), sep="")
+  vertex.betweeness<-betweenness(graph, directed=F)
+  Ae<-sapply(split(subdata,pops), function (x) mean(Ae(x)$Ae))
+  plot(vertex.betweeness,Ae)
+  title(main=tosubset,
+        sub=paste("modularity = ", round(max(eb[[5]]),3), " n.groups = ", 
+                  length(unique(eb$membership)), sep="")
+  )  
   member <- eb$membership
   color<-rainbow(length(unique(member)))[member]
   color[is.na(color)]<-"black"
@@ -70,6 +77,6 @@ spatial.genetic.graph<-function(pop.obj=gs,
               hjust = -.5,
               vjust = -.5,
               size = 8/ptspermm)
-  print(p)
+  if(plotmap){print(p)}
   return(p)
 } 
